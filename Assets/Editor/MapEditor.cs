@@ -16,10 +16,19 @@ public class MapEditor
     private static void GenerateMap()
     {
         // test
-        if(EditorUtility.DisplayDialog("Genertate Map", "Do you wnat to generate map?", "Generate", "Close"))
+        //if(EditorUtility.DisplayDialog("Genertate Map", "Do you wnat to generate map?", "Generate", "Close"))
+        //{
+        //    new GameObject("Generated Map");
+        //}
+
+        GameObject go = GameObject.Find("Map");
+
+        if(go == null)
         {
-            new GameObject("Generated Map");
+            return;
         }
+
+        
     }
 #endif
 }
