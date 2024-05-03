@@ -8,7 +8,6 @@ using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
-    public Grid _grid;
     [SerializeField]
     private float _speed = 5.0f;
 
@@ -83,7 +82,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _animator = GetComponent<Animator>();
-        Vector3 pos = _grid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0);
+        Vector3 pos = Managers.Map.CurrentGrid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0f);
         transform.position = pos;
     }
 
@@ -96,12 +95,17 @@ public class PlayerController : MonoBehaviour
  
     }
 
+    private void LateUpdate()
+    {
+        Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -10f);
+    }
+
     private void UpdatePosition()
     {
         if(_isMoving == false) { return; }
 
         // 도착지, 방향
-        Vector3 destPos = _grid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0);
+        Vector3 destPos = Managers.Map.CurrentGrid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0);
         Vector3 destDir = destPos - transform.position;
 
         // 도착 여부 체크
@@ -120,29 +124,32 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateIsMoving()
     {
-        if (_isMoving == false)
+        if (_isMoving == false && _dir != MoveDirection.None)
         {
+            Vector3Int destiPos = _cellPos;
             switch (_dir)
             {
                 case MoveDirection.Up:
-                    _cellPos += Vector3Int.up;
-                    _isMoving = true;
+                    destiPos += Vector3Int.up;
                     break;
 
                 case MoveDirection.Down:
-                    _cellPos += Vector3Int.down;
-                    _isMoving = true;
+                    destiPos += Vector3Int.down;
                     break;
 
                 case MoveDirection.Left:
-                    _cellPos += Vector3Int.left;
-                    _isMoving = true;
+                    destiPos += Vector3Int.left;
                     break;
 
                 case MoveDirection.Right:
-                    _cellPos += Vector3Int.right;
-                    _isMoving = true;
+                    destiPos += Vector3Int.right;
                     break;
+            }
+
+            if(Managers.Map.CanGo(destiPos))
+            {
+                _cellPos = destiPos;
+                _isMoving = true;
             }
 
         }
