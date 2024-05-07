@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
@@ -8,6 +9,19 @@ public class Managers : MonoBehaviour
     static Managers Instance { get { Init(); return s_instance; } } // 유일한 매니저를 갖고온다
 
 	#region Contents
+
+    MapManager _map = new MapManager();
+    ObjectManager _object = new ObjectManager();
+    public static MapManager Map
+    {
+        get { return Instance._map; }
+    }
+
+    public static ObjectManager Object
+    {
+        get { return Instance._object; }
+    }
+
 	#endregion
 
 	#region Core

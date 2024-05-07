@@ -28,6 +28,7 @@ public class MapEditor
         GameObject[] gameObjects = Resources.LoadAll<GameObject>("Prefabs/Map");
         foreach (GameObject gameObject in gameObjects)
         {
+            Tilemap tilemapBase = Util.FindChild<Tilemap>(gameObject, "Tilemap_Base", true);
             Tilemap tilemap = Util.FindChild<Tilemap>(gameObject, "Collision", true);
             if(tilemap == null)
             {
@@ -38,14 +39,14 @@ public class MapEditor
             // 추출된 blocked 정보를 파일로 만들기
             using (var writer = File.CreateText($"Assets/Resources/Map/{gameObject.name}.txt"))
             {
-                writer.WriteLine(tilemap.cellBounds.xMin);
-                writer.WriteLine(tilemap.cellBounds.xMax);
-                writer.WriteLine(tilemap.cellBounds.yMin);
-                writer.WriteLine(tilemap.cellBounds.yMax);
+                writer.WriteLine(tilemapBase.cellBounds.xMin);
+                writer.WriteLine(tilemapBase.cellBounds.xMax);
+                writer.WriteLine(tilemapBase.cellBounds.yMin);
+                writer.WriteLine(tilemapBase.cellBounds.yMax);
 
-                for (int y = tilemap.cellBounds.yMax; y >= tilemap.cellBounds.yMin; y--)
+                for (int y = tilemapBase.cellBounds.yMax; y >= tilemapBase.cellBounds.yMin; y--)
                 {
-                    for (int x = tilemap.cellBounds.xMin; x <= tilemap.cellBounds.xMax; x++)
+                    for (int x = tilemapBase.cellBounds.xMin; x <= tilemapBase.cellBounds.xMax; x++)
                     {
                         TileBase tileBase = tilemap.GetTile(new Vector3Int(x, y, 0));
                         if (tileBase != null)
