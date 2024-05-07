@@ -33,8 +33,8 @@ public class CreatureController : MonoBehaviour
     }
 
 
-    MoveDir _lastDir = MoveDir.Down;
-    MoveDir _dir = MoveDir.Down;
+    protected MoveDir _lastDir = MoveDir.Down;
+    protected MoveDir _dir = MoveDir.Down;
     public MoveDir Dir
     {
         get { return _dir; }
