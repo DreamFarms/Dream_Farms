@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
@@ -10,9 +11,15 @@ public class Managers : MonoBehaviour
 	#region Contents
 
     MapManager _map = new MapManager();
+    ObjectManager _object = new ObjectManager();
     public static MapManager Map
     {
         get { return Instance._map; }
+    }
+
+    public static ObjectManager Object
+    {
+        get { return Instance._object; }
     }
 
 	#endregion

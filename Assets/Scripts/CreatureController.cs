@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using static Define;
@@ -9,7 +10,8 @@ public class CreatureController : MonoBehaviour
     [SerializeField]
     private float _speed = 5.0f;
 
-    protected Vector3Int _cellPos = Vector3Int.zero;
+    public Vector3Int CellPos { get; set; } = Vector3Int.zero;
+
     protected Animator _animator;
     protected SpriteRenderer _spriteRenderer;
 
@@ -54,6 +56,31 @@ public class CreatureController : MonoBehaviour
         }
     }
 
+    // 내가 바라보는 방향의 한칸 앞 칸 좌표를 얻음
+    // n칸 앞 칸을 얻고싶으면 매개로 숫자를 넣고 Vector3Int.up * n;
+    public Vector3Int GetFrontCellPos()
+    {
+        Vector3Int cellPos = CellPos;
+
+        switch(_lastDir)
+        {
+            case MoveDir.Up:
+                cellPos += Vector3Int.up;
+                break;
+            case MoveDir.Down:
+                cellPos += Vector3Int.down;
+                break;
+            case MoveDir.Left:
+                cellPos += Vector3Int.left;
+                break;
+            case MoveDir.Right:
+                cellPos += Vector3Int.right;
+                break;
+        }
+
+        return cellPos;
+    }
+
     void Start()
     {
         Init();
@@ -68,7 +95,7 @@ public class CreatureController : MonoBehaviour
     protected virtual void Init()
     {
         _animator = GetComponent<Animator>();
-        Vector3 pos = Managers.Map.CurrentGrid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0f);
+        Vector3 pos = Managers.Map.CurrentGrid.CellToWorld(CellPos) + new Vector3(0.5f, 0.5f, 0f);
         transform.position = pos;
 
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -76,17 +103,31 @@ public class CreatureController : MonoBehaviour
 
     protected virtual void UpdateController()
     {
-        UpdatePosition();
-        UpdateIsMoving();
+        switch(State)
+        {
+            case CreatureState.Idle:
+                UpdateIdle();
+                break;
+            case CreatureState.Moving:
+                 UpdateMoving();
+                break;
+            case CreatureState.Skill:
+                UpdateSkill();
+                break;
+            case CreatureState.Dead:
+                UpdateDead();
+                break;
+        }
     }
 
 
-    private void UpdatePosition()
+    // 이동 가능한 상태일 때, 이동
+    protected virtual void UpdateMoving()
     {
         if (State != CreatureState.Moving) { return; }
 
         // 도착지, 방향
-        Vector3 destPos = Managers.Map.CurrentGrid.CellToWorld(_cellPos) + new Vector3(0.5f, 0.5f, 0);
+        Vector3 destPos = Managers.Map.CurrentGrid.CellToWorld(CellPos) + new Vector3(0.5f, 0.5f, 0);
         Vector3 destDir = destPos - transform.position;
 
         // 도착 여부 체크
@@ -110,11 +151,12 @@ public class CreatureController : MonoBehaviour
         }
     }
 
-    private void UpdateIsMoving()
+    // 이동 업데이트
+    protected virtual void UpdateIdle()
     {
-        if (State == CreatureState.Idle && _dir != MoveDir.None)
+        if (_dir != MoveDir.None)
         {
-            Vector3Int destiPos = _cellPos;
+            Vector3Int destiPos = CellPos;
             switch (_dir)
             {
                 case MoveDir.Up:
@@ -134,14 +176,33 @@ public class CreatureController : MonoBehaviour
                     break;
             }
 
+            State = CreatureState.Moving;
+
             if (Managers.Map.CanGo(destiPos))
             {
-                _cellPos = destiPos;
-                State = CreatureState.Moving;
+                if(Managers.Object.Find(destiPos) == null)
+                {
+                    CellPos = destiPos;
+                }
             }
 
         }
     }
+
+
+    // 스킬 업데이트
+    protected virtual void UpdateSkill()
+    {
+
+    }
+
+
+    // 죽음 업데이트
+    protected virtual void UpdateDead()
+    {
+
+    }
+
 
     protected virtual void UpdateAnimation()
     {
@@ -200,7 +261,29 @@ public class CreatureController : MonoBehaviour
         }
         else if(State == CreatureState.Skill)
         {
-            // 스킬
+            switch (_lastDir)
+            {
+                case MoveDir.Up:
+                    _animator.Play("ATTACK_BACK");
+                    _spriteRenderer.flipX = false;
+                    break;
+
+                case MoveDir.Right:
+                    _animator.Play("ATTACK_RIGHT");
+                    _spriteRenderer.flipX = false;
+                    break;
+
+                case MoveDir.Left:
+                    _animator.Play("ATTACK_RIGHT");
+                    _spriteRenderer.flipX = true;
+                    //transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+                    break;
+
+                case MoveDir.Down:
+                    _animator.Play("ATTACK_FRONT");
+                    _spriteRenderer.flipX = false;
+                    break;
+            }
         }
         else
         {
